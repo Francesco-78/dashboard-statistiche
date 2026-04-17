@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economia Europea</title>
+
+  <!-- Font Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS dedicato alla pagina Economia -->
+  <link rel="stylesheet" href="css/economia.css">
+</head>
+
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <h1>Economia Europea</h1>
+  </header>
+
+  <!-- LAYOUT A DUE COLONNE -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <h2>Indicatori</h2>
+      <p>Seleziona gli indicatori da visualizzare:</p>
+
+      <div class="indicator-group">
+        <label class="chk"><input type="checkbox" value="gdp"> PIL</label>
+        <label class="chk"><input type="checkbox" value="inflation"> Inflazione</label>
+        <label class="chk"><input type="checkbox" value="unemployment"> Disoccupazione</label>
+        <label class="chk"><input type="checkbox" value="debt"> Debito pubblico</label>
+      </div>
+    </aside>
+
+    <!-- CONTENUTO PRINCIPALE -->
+    <main class="content">
+      <section class="charts-row" id="chartsContainer"></section>
+    </main>
+
+  </div>
+
+  <!-- JS dedicato alla pagina Economia -->
+  <script type="module" src="js/economia.js"></script>
+
+</body>
+</html>

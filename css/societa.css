@@ -1,0 +1,262 @@
+/* ============================================================
+   PALETTE SOCIETÀ — SABBIA TENUE
+============================================================ */
+:root {
+    --sabbia-chiara: #f6f4ef;
+    --sabbia-media: #efeae0;
+    --sabbia-scura: #c9b79c;
+    --testo: #1e2b4a;
+    --bordo: rgba(0,0,0,0.06);
+    --ombra: rgba(0,0,0,0.03);
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--sabbia-chiara);
+    color: var(--testo);
+}
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    height: 72px;
+    background: linear-gradient(180deg, var(--sabbia-chiara), var(--sabbia-media));
+    border-bottom: 1px solid var(--bordo);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    box-shadow: 0 2px 6px var(--ombra);
+}
+
+.topbar-inner {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 28px;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hamburger {
+    font-size: 22px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--testo);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.site-sub {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #4b5b78;
+}
+
+.topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.top-btn {
+    background: #fff;
+    border: 1px solid var(--bordo);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--testo);
+    font-weight: 600;
+}
+
+/* ============================================================
+   SIDEBAR A SCOMPARSA
+============================================================ */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 100vh;
+    background: var(--sabbia-media);
+    border-right: 1px solid var(--bordo);
+    transition: width 220ms ease;
+    overflow: hidden;
+    z-index: 1100;
+    box-shadow: 2px 0 12px var(--ombra);
+}
+
+.sidebar:hover,
+.sidebar.open {
+    width: 300px;
+}
+
+.sidebar-content {
+    opacity: 0;
+    transition: opacity 180ms ease;
+    padding: 20px;
+}
+
+.sidebar:hover .sidebar-content,
+.sidebar.open .sidebar-content {
+    opacity: 1;
+}
+
+.sidebar h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--testo);
+}
+
+.sidebar-footer a {
+    color: #0b66c3;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ============================================================
+   LAYOUT PAGINA
+============================================================ */
+.page-main {
+    margin-top: 92px;
+    padding: 18px;
+    margin-left: 64px; /* spazio per sidebar chiusa */
+}
+
+.sidebar.open ~ .page-main {
+    margin-left: 300px;
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero-societa {
+    background: #fff;
+    padding: 22px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px var(--ombra);
+}
+
+.hero-inner {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.hero-text {
+    flex: 1 1 420px;
+    min-width: 260px;
+}
+
+.hero-media {
+    flex: 0 0 320px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+    max-width: 320px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* ============================================================
+   GRAFICI — GRIGLIA RESPONSIVE
+============================================================ */
+.charts-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 18px;
+}
+
+.chart-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    height: 360px;
+    box-shadow: 0 6px 18px var(--ombra);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card canvas {
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Messaggio vuoto */
+.charts-empty {
+    padding: 28px;
+    text-align: center;
+    color: #666;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 820px) {
+    .hero-inner {
+        flex-direction: column-reverse;
+    }
+    .hero-media {
+        width: 100%;
+        max-width: 420px;
+    }
+    .sidebar {
+        width: 0;
+    }
+    .sidebar.open {
+        width: 260px;
+    }
+    .page-main {
+        margin-left: 0;
+    }
+}
+
+/* ============================================================
+   ANIMAZIONI
+============================================================ */
+.fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

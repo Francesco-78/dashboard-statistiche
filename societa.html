@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Società Europea</title>
+
+  <!-- Font Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS dedicato alla pagina Società -->
+  <link rel="stylesheet" href="css/societa.css">
+</head>
+
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <button class="hamburger" id="sidebarToggle">☰</button>
+        <div>
+          <h1 class="site-title">Società Europea</h1>
+          <p class="site-sub">Indicatori demografici e sociali</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <a href="index.html" class="top-btn">Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-content">
+      <h2>Indicatori</h2>
+      <p>Seleziona gli indicatori da visualizzare:</p>
+
+      <div class="indicator-group">
+        <label class="chk"><input type="checkbox" value="fertility"> Tasso di fertilità</label>
+        <label class="chk"><input type="checkbox" value="life"> Aspettativa di vita</label>
+        <label class="chk"><input type="checkbox" value="median_age"> Età mediana</label>
+        <label class="chk"><input type="checkbox" value="population"> Popolazione</label>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="index.html">← Torna alla Home</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENUTO PRINCIPALE -->
+  <main class="page-main">
+
+    <section class="hero-societa fade-in">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <h2>Statistiche Sociali Europee</h2>
+          <p>Esplora indicatori demografici aggiornati per i paesi europei.</p>
+        </div>
+
+        <div class="hero-media">
+          <img src="img/societa.jpg" class="hero-image" alt="Società Europea">
+        </div>
+      </div>
+    </section>
+
+    <!-- GRIGLIA GRAFICI -->
+    <section class="charts-grid" id="chartsContainer"></section>
+
+  </main>
+
+  <!-- JS dedicato alla pagina Società -->
+  <script type="module" src="js/societa.js"></script>
+
+</body>
+</html>

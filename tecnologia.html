@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tecnologia — Statistiche</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <nav class="navbar sticky">
+    <div class="logo">StatsHub</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="economia.html">Economia</a></li>
+      <li><a class="active" href="tecnologia.html">Tecnologia</a></li>
+    </ul>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+  </nav>
+
+  <header class="page-header">
+    <h1>Tecnologia</h1>
+    <p>Trend digitali, innovazione e crescita del settore tech.</p>
+  </header>
+
+  <main class="content">
+
+    <div class="card">
+      <h3>Utenti Internet nel mondo</h3>
+      <canvas id="internetChart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Vendite smartphone</h3>
+      <canvas id="smartphoneChart"></canvas>
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    new Chart(document.getElementById('internetChart'), {
+      type: 'line',
+      data: {
+        labels: ['2018','2019','2020','2021','2022','2023'],
+        datasets: [{
+          label: 'Miliardi di utenti',
+          data: [3.9, 4.1, 4.5, 4.8, 5.0, 5.3],
+          borderColor: '#6A8CAF',
+          tension: 0.3
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('smartphoneChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Samsung','Apple','Xiaomi','Oppo','Vivo'],
+        datasets: [{
+          label: 'Milioni di unità vendute',
+          data: [260, 230, 190, 120, 110],
+          backgroundColor: '#6A8CAF'
+        }]
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,164 @@
+/* ============================================================
+   PALETTE ECONOMIA — BLU POLVERE
+============================================================ */
+:root {
+    --blu-polvere: #6A8CAF;
+    --bg: #eef2fb;
+    --text: #1f2937;
+    --card-bg: #ffffff;
+    --bordo: rgba(0,0,0,0.06);
+    --ombra: rgba(0,0,0,0.04);
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ============================================================
+   TOPBAR SEMPLICE
+============================================================ */
+.topbar {
+    background: var(--card-bg);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--bordo);
+    box-shadow: 0 2px 6px var(--ombra);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--blu-polvere);
+}
+
+/* ============================================================
+   LAYOUT A DUE COLONNE
+============================================================ */
+.layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* ============================================================
+   SIDEBAR FISSA
+============================================================ */
+.sidebar {
+    background: #fbfaf7;
+    border-right: 1px solid var(--bordo);
+    padding: 20px 16px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #1e2b4a;
+}
+
+.sidebar p {
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 12px;
+}
+
+/* Checkbox indicatori */
+.indicator-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chk {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.12s;
+}
+
+.chk:hover {
+    background: rgba(0,0,0,0.03);
+}
+
+.chk input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================================
+   CONTENUTO PRINCIPALE
+============================================================ */
+.content {
+    padding: 24px 28px;
+}
+
+/* ============================================================
+   GRIGLIA GRAFICI — 2 COLONNE
+============================================================ */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 20px;
+}
+
+.chart-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 14px;
+    height: 360px;
+    box-shadow: 0 6px 18px var(--ombra);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card canvas {
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Messaggio vuoto */
+.charts-empty {
+    padding: 28px;
+    text-align: center;
+    color: #666;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+    .sidebar {
+        position: relative;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--bordo);
+    }
+}

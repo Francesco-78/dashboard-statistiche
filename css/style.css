@@ -1,0 +1,202 @@
+/* ============================================================
+   PALETTE HOME — GRIGIO SFUMATO ELEGANTE
+============================================================ */
+:root {
+  --accent: #6b7280;        /* grigio elegante */
+  --bg: #f3f4f6;            /* grigio chiarissimo */
+  --text: #1f2937;          /* grigio scuro */
+  --card-bg: #ffffff;
+  --ombra: rgba(0,0,0,0.05);
+  --ombra-strong: rgba(0,0,0,0.12);
+}
+
+body.dark {
+  --bg: #1f2937;
+  --text: #f3f4f6;
+  --card-bg: #374151;
+}
+
+/* ============================================================
+   BASE
+============================================================ */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ============================================================
+   NAVBAR HOME
+============================================================ */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: var(--card-bg);
+  box-shadow: 0 2px 5px var(--ombra);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: padding 0.3s ease;
+}
+
+.navbar.scrolled {
+  padding: 12px 40px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.theme-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+/* ============================================================
+   HERO HOME
+============================================================ */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+/* ============================================================
+   GRID DELLA HOME
+============================================================ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+  padding: 40px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: 0 2px 5px var(--ombra);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px var(--ombra-strong);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+/* Icone nelle card */
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card-title .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+/* ============================================================
+   FOOTER HOME
+============================================================ */
+.footer {
+  margin-top: 40px;
+  padding: 20px 40px;
+  background: var(--card-bg);
+  border-top: 1px solid var(--ombra);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.footer-logo {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.footer-right {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.footer-right a {
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.footer-right a:hover {
+  opacity: 1;
+}
+
+/* ============================================================
+   ANIMAZIONI
+============================================================ */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 14px 20px;
+  }
+
+  .grid {
+    padding: 20px;
+  }
+
+  .footer {
+    padding: 20px;
+  }
+}
