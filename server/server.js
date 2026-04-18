@@ -1,253 +1,109 @@
 // server/server.js
-// Express server con:
-// - endpoint /api (World Bank per country/indicator) [mantiene il comportamento esistente]
-// - endpoint /markets (Yahoo Finance) [mantiene il comportamento esistente]
-// - nuovo endpoint /proxy?url=... con cache su filesystem (24h TTL di default)
-// - prefetch e background refresh per cache
-//
-// Requisiti: Node 18+ (fetch globale), npm install express cors morgan mkdirp dotenv
-
 import express from "express";
-import cors from "cors";
-import morgan from "morgan";
-import fs from "fs";
+//import fetch from "node-fetch";
 import path from "path";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { fileURLToPath } from "url";
 
 const app = express();
-app.use(cors());
-app.use(morgan("dev"));
-app.use(express.json());
+const PORT = 3000;
 
-// CONFIGURAZIONE (puoi sovrascrivere con .env)
-const PORT = process.env.PORT || 3000;
-const CACHE_DIR = process.env.CACHE_DIR || path.join(process.cwd(), "server", "cache", "data");
-const CACHE_TTL_HOURS = Number(process.env.CACHE_TTL_HOURS || 24); // 24 ore
-const PROXY_PREFIX = process.env.PROXY_PREFIX || "/proxy";
-const PREFETCH_INDICATORS = (process.env.PREFETCH_INDICATORS || "SP.POP.TOTL,SP.DYN.LE00.IN,NY.GDP.PCAP.CD").split(",");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// crea la cartella in modo ricorsivo (senza mkdirp)
-fs.mkdirSync(CACHE_DIR, { recursive: true });
+// Static
+app.use(express.static(path.join(__dirname, "..")));
 
+// ----------------------
+// MAPPING INDICATORI
+// ----------------------
 
-// ----------------- helper cache -----------------
-function safeFilenameForUrl(url) {
-  // base64 url-safe
-  const b = Buffer.from(url).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  return `${b}.json`;
-}
+// Economia
+const ECON_INDICATORS = {
+  gdp: "NY.GDP.PCAP.CD",          // PIL pro capite
+  population: "SP.POP.TOTL",      // Popolazione totale
+  health: "SH.XPD.CHEX.PC.CD",    // Spesa sanitaria pro capite
+  education: "IT.NET.USER.ZS"     // Utenti internet (% popolazione) come proxy "educazione"
+};
 
-function readCache(filePath) {
-  try {
-    const raw = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(raw);
-  } catch (e) {
-    return null;
-  }
-}
+// Società
+const SOC_INDICATORS = {
+  fertility: "SP.DYN.TFRT.IN",    // Tasso di fertilità
+  life_expectancy: "SP.DYN.LE00.IN", // Aspettativa di vita
+  mortality: "SP.DYN.IMRT.IN",    // Mortalità infantile
+  health: "SH.XPD.CHEX.PC.CD"     // Spesa sanitaria pro capite
+};
 
-function writeCache(filePath, obj) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), "utf8");
-    return true;
-  } catch (e) {
-    console.error("writeCache error:", e);
-    return false;
-  }
-}
+// ----------------------
+// FUNZIONE GENERICA WORLD BANK
+// ----------------------
+async function fetchWorldBank(indicatorCode) {
+  const url = `https://api.worldbank.org/v2/country/all/indicator/${indicatorCode}?format=json&per_page=20000`;
 
-function isStale(obj) {
-  if (!obj || !obj.lastUpdated) return true;
-  const last = new Date(obj.lastUpdated).getTime();
-  const now = Date.now();
-  return (now - last) > CACHE_TTL_HOURS * 3600 * 1000;
-}
-
-// ----------------- existing endpoints (kept) -----------------
-
-/* ============================================================
-   WORLD BANK — PROXY UNICO (esistente)
-   Mantengo il tuo endpoint /api per compatibilità
-============================================================ */
-app.get("/api", async (req, res) => {
-  const { country, indicator } = req.query;
-
-  if (!country || !indicator) {
-    return res.status(400).json({ error: "Missing parameters" });
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Errore HTTP World Bank: ${res.status}`);
   }
 
-  const url =
-    `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=60`;
+  const data = await res.json();
+  if (!Array.isArray(data) || data.length < 2 || !Array.isArray(data[1])) {
+    throw new Error("Struttura dati World Bank inattesa");
+  }
 
+  // Prendiamo solo l'anno più recente disponibile per ogni paese
+  const rows = data[1]
+    .filter(d => d.country && d.country.value && d.value !== null)
+    .map(d => ({
+      country: d.country.value,
+      value: Number(d.value),
+      year: d.date
+    }));
+
+  return rows;
+}
+
+// ----------------------
+// API ECONOMIA
+// ----------------------
+app.get("/api/economia/:indicator", async (req, res) => {
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("World Bank HTTP error:", response.status, text.slice(0, 200));
-      return res.status(500).json({ error: "World Bank fetch failed", status: response.status });
+    const indicator = req.params.indicator;
+    const code = ECON_INDICATORS[indicator];
+
+    if (!code) {
+      return res.status(404).json({ error: "Indicatore economia non trovato" });
     }
 
-    const data = await response.json();
-    res.json(data);
+    const rows = await fetchWorldBank(code);
+    res.json(rows);
   } catch (err) {
-    console.error("World Bank error:", err);
-    res.status(500).json({ error: "World Bank fetch failed" });
+    console.error("Errore /api/economia:", err);
+    res.status(500).json({ error: "Errore interno server economia" });
   }
 });
 
-/* ============================================================
-   YAHOO FINANCE — INDICI DI MERCATO (esistente)
-============================================================ */
-
-app.get("/markets", async (req, res) => {
-  const { symbol } = req.query;
-
-  if (!symbol) {
-    return res.status(400).json({ error: "Missing symbol" });
-  }
-
-  const url =
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1d`;
-
+// ----------------------
+// API SOCIETÀ
+// ----------------------
+app.get("/api/societa/:indicator", async (req, res) => {
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Yahoo Finance HTTP error:", response.status, text.slice(0, 200));
-      return res.status(500).json({ error: "Yahoo Finance fetch failed", status: response.status });
+    const indicator = req.params.indicator;
+    const code = SOC_INDICATORS[indicator];
+
+    if (!code) {
+      return res.status(404).json({ error: "Indicatore società non trovato" });
     }
 
-    const data = await response.json();
-    const result = data?.chart?.result?.[0];
-    const close = result?.indicators?.quote?.[0]?.close?.[0] ?? null;
-
-    res.json({
-      symbol,
-      value: close
-    });
+    const rows = await fetchWorldBank(code);
+    res.json(rows);
   } catch (err) {
-    console.error("Yahoo Finance error:", err);
-    res.status(500).json({ error: "Yahoo Finance fetch failed" });
+    console.error("Errore /api/societa:", err);
+    res.status(500).json({ error: "Errore interno server società" });
   }
 });
 
-// ----------------- nuovo endpoint proxy con cache -----------------
-
-/**
- * GET /proxy?url=<remoteUrl>
- * - se esiste cache valida (non stale) restituisce il file cache
- * - altrimenti fetch remoto, salva cache e restituisce
- * - se fetch remoto fallisce e esiste cache (anche stale) restituisce cache con warning
- */
-app.get(PROXY_PREFIX, async (req, res) => {
-  const remoteUrl = req.query.url;
-  if (!remoteUrl) return res.status(400).json({ error: "Missing url query param" });
-
-  const filename = safeFilenameForUrl(remoteUrl);
-  const filepath = path.join(CACHE_DIR, filename);
-
-  const cached = readCache(filepath);
-  if (cached && !isStale(cached)) {
-    return res.json({ cached: true, payload: cached });
-  }
-
-  try {
-    const r = await fetch(remoteUrl, { timeout: 30000 });
-    if (!r.ok) throw new Error(`Remote fetch failed ${r.status}`);
-    const contentType = r.headers.get("content-type") || "";
-    let payload;
-    if (contentType.includes("application/json") || contentType.includes("text/json")) {
-      payload = await r.json();
-    } else {
-      const txt = await r.text();
-      try { payload = JSON.parse(txt); } catch (e) { payload = txt; }
-    }
-
-    const wrapped = {
-      lastUpdated: new Date().toISOString(),
-      sourceUrl: remoteUrl,
-      contentType,
-      payload
-    };
-
-    writeCache(filepath, wrapped);
-    return res.json({ cached: false, payload: wrapped });
-  } catch (e) {
-    console.error("Proxy fetch error:", e.message);
-    if (cached) return res.json({ cached: true, payload: cached, warning: "stale" });
-    return res.status(502).json({ error: "Proxy fetch failed", detail: e.message });
-  }
-});
-
-// ----------------- prefetch e background refresh -----------------
-
-async function prefetchIndicator(indicatorCode) {
-  try {
-    if (!indicatorCode) return;
-    const wbUrl = `https://api.worldbank.org/v2/country/all/indicator/${indicatorCode}?format=json&per_page=20000`;
-    const filename = safeFilenameForUrl(wbUrl);
-    const filepath = path.join(CACHE_DIR, filename);
-
-    const cached = readCache(filepath);
-    if (cached && !isStale(cached)) {
-      console.log(`Prefetch skip (fresh): ${indicatorCode}`);
-      return;
-    }
-
-    console.log(`Prefetching ${indicatorCode} ...`);
-    const r = await fetch(wbUrl, { timeout: 60000 });
-    if (!r.ok) throw new Error(`WB fetch ${r.status}`);
-    const payload = await r.json();
-    const wrapped = { lastUpdated: new Date().toISOString(), sourceUrl: wbUrl, contentType: 'application/json', payload };
-    writeCache(filepath, wrapped);
-    console.log(`Prefetch done: ${indicatorCode}`);
-  } catch (e) {
-    console.error(`Prefetch error ${indicatorCode}`, e.message);
-  }
-}
-
-async function backgroundRefresh() {
-  try {
-    const files = fs.readdirSync(CACHE_DIR);
-    for (const f of files) {
-      const fp = path.join(CACHE_DIR, f);
-      const obj = readCache(fp);
-      if (!obj || isStale(obj)) {
-        if (obj && obj.sourceUrl) {
-          console.log(`Refreshing cache for ${obj.sourceUrl}`);
-          try {
-            const r = await fetch(obj.sourceUrl, { timeout: 30000 });
-            if (r.ok) {
-              const contentType = r.headers.get('content-type') || '';
-              let payload;
-              if (contentType.includes('application/json')) payload = await r.json();
-              else {
-                const txt = await r.text();
-                try { payload = JSON.parse(txt); } catch (e) { payload = txt; }
-              }
-              const wrapped = { lastUpdated: new Date().toISOString(), sourceUrl: obj.sourceUrl, contentType, payload };
-              writeCache(fp, wrapped);
-            }
-          } catch (e) {
-            console.error('Background refresh failed for', obj.sourceUrl, e.message);
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Background refresh error', e.message);
-  }
-}
-
-// avvio server
-app.listen(PORT, async () => {
-  console.log(`Server attivo su http://localhost:${PORT}`);
-  // prefetch indicati
-  for (const code of PREFETCH_INDICATORS) {
-    if (code && code.trim()) prefetchIndicator(code.trim());
-  }
-  // schedule background refresh ogni ora
-  setInterval(backgroundRefresh, 60 * 60 * 1000);
+// ----------------------
+// AVVIO SERVER
+// ----------------------
+app.listen(PORT, () => {
+  console.log(`Server avviato su http://localhost:${PORT}`);
 });

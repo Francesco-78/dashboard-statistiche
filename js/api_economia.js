@@ -1,45 +1,29 @@
-// ============================================================
-// API ECONOMIA — Fetch + Normalizzazione
-// ============================================================
+// js/api_economia.js
 
-const API_BASE = "http://localhost:3000/api/economia";
+const API_BASE_ECON = "/api/economia";
 
-/**
- * Restituisce i dati normalizzati per un indicatore economico.
- * Output garantito:
- * {
- *   labels: [...],
- *   values: [...]
- * }
- */
 export async function getEconomiaIndicator(indicator) {
   try {
-    const res = await fetch(`${API_BASE}/${indicator}`);
+    const res = await fetch(`${API_BASE_ECON}/${indicator}`);
 
     if (!res.ok) {
-      console.error("Errore HTTP:", res.status);
-      return emptyResult();
+      console.error("Errore HTTP economia:", res.status);
+      return { labels: [], values: [] };
     }
 
     const raw = await res.json();
 
-    if (!raw || !Array.isArray(raw)) {
-      console.warn("Struttura dati inattesa:", raw);
-      return emptyResult();
+    if (!Array.isArray(raw)) {
+      console.warn("Struttura dati economia inattesa:", raw);
+      return { labels: [], values: [] };
     }
 
-    const labels = raw.map(r => r.country || r.label || "N/D");
+    const labels = raw.map(r => r.country || "N/D");
     const values = raw.map(r => Number(r.value) || 0);
 
     return { labels, values };
-
   } catch (err) {
     console.error("Errore fetch API Economia:", err);
-    return emptyResult();
+    return { labels: [], values: [] };
   }
-}
-
-/** Risultato vuoto */
-function emptyResult() {
-  return { labels: [], values: [] };
 }
